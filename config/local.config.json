@@ -1,0 +1,12 @@
+{
+    "ServerName":"develpoment",
+    "_LOCAL_PORT_": 4000,
+    "Database":{
+        "DatabaseName":"database",
+        "DatabasePort":27017,
+        "DatabasePass":"cQGRLDLvylpULsXA",
+        "DatabaseUsername":"SanjayMurmu",
+        "Protocol":"mongodb+srv://",
+        "Host":"nodewaycooltrainingprog"
+    }
+}

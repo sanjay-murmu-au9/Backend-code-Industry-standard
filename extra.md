@@ -1,0 +1,1 @@
+mongodb+srv://SanjayMurmu:cQGRLDLvylpULsXA@nodewaycooltrainingprog.pzqd6.mongodb.net/database?retryWrites=true&w=majority

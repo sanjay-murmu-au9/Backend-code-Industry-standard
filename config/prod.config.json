@@ -1,0 +1,13 @@
+{
+    "ServerName":"production",
+    "_Local_Port_": 5000,
+    "Database":{
+        "Database":"",
+        "DatabaseName":"",
+        "DatabasePort":"",
+        "DatabasePass":"cQGRLDLvylpULsXA",
+        "DatabaseUsername":"SanjayMurmu",
+        "Protocol":"mongodb+srv://",
+        "Host":""
+    }
+}
