@@ -1,0 +1,39 @@
+doctype html
+header.text-center(style="height:25px;padding:0.8em;background-color:#34495E;margin-bottom:1em;text-align:center;")
+  .logo(style="max-width:33.33%;")
+    img(src="",style="left:15px;positon:fixed;top:20px;transform:rotate(12deg);width:5%;float:left;")
+    p(style="color:white;font-family:Palatino;font-size:1.2em;margin-top:4px;")
+      | Sasta Lens &amp; Product 
+      | Private Limited
+.body(style='padding: 1em;margin-right:auto;margin-left:auto;max-width:800px;color:#2C3E50')
+    p(style='font-family:Palatino;color:#34495E;font-size:1.5em') Dear #{emailSentTo} members,
+    if DMS_source == "DMS"
+        p(style='color: #34495E;font-size:15px')
+            | This is an automated alert from the Garuda DMS platform; a new customer has been onboarded throug <b>#{DMS_source}</b> app by <b>#{salesmanName}</b>
+            | for which the provided <b style="text-transform: uppercase">#{matchedEkyc}</b> matched with an existing <b>Customer ID -</b> <b>#{goFrugalArray}.</b>
+            | Therefore this new onboarding has been blocked from the DMS Garuda DMS platform.Requesting you to proced with parent-child mapping from your end.
+    else 
+        p(style='color: #34495E;font-size:15px') 
+            | This is an automated alert from the Garuda DMS platform; a new customer has been onboarded throug <b>#{DMS_source}</b>
+            | for which the provided <b style="text-transform: uppercase">#{matchedEkyc}</b> matched with an existing <b>Customer ID -</b> <b>#{goFrugalArray}.</b>
+            | Therefore this new onboarding has been blocked from the DMS Garuda DMS platform.Requesting you to proced with parent-child mapping from your end.
+
+    
+    div(style='text-align:left;color:#34495E;font-size:15px')
+        | Onboardind Details 
+        br
+        | Name - #{name}
+        br
+        | Phone - #{mobileNumber}
+        br
+        | Email - #{email}
+        br
+        br
+
+    p(style='color: #34495E;font-size:15px') 
+        | Best Regards,
+        br
+        | Call Centers Team 
+    br
+    p(style='font-family: Palatino;font-size:1.5em') SastaLens.com &amp; Private Limited Corp 
+
