@@ -26,6 +26,11 @@ class ProductQuery {
         }
         return await Model.find({})
     }
+
+    // image upload
+    async imageUpload(url) {
+        return await Model.create({ imageUrl: url })
+    }
 }
 
 module.exports = new ProductQuery()

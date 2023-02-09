@@ -4,6 +4,7 @@ const app = express();
 app.use('/api/v1/', require('./userDetail.route'))
 app.use('/api/v1/', require('./product.route'))
 app.use('/api/v1/', require('./sampleReport.route'))
+app.use('/api/v1/', require('./fileUpload.route'))
 
 
 app.use(function (req, res, next) {

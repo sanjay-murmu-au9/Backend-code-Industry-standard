@@ -1,4 +1,3 @@
-const { default: mongoose } = require('mongoose');
 const Query = require('../Queries/productQuery')
 const __ = require('../Utilities/Response');
 
