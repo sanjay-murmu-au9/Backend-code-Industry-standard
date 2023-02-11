@@ -259,7 +259,7 @@ class User {
                     let emailSent = await EmailService.sendEmail(email_obj.subject, email_obj.html, email_obj.to)
 
 
-
+                    // why didn't reflect in git
                     if (emailSent.response) {
                         return __.successMsg(req, res, 201, emailSent.response, "Email sent successfully!!");
                     } else {
