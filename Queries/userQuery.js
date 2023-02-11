@@ -113,8 +113,6 @@ class UserTemp {
     }
 
     async updateLoginDetail(objectId) {
-        // let ObjectId = mongoose.types.ObjectId(objectId)
-        console.log(objectId, "<<<<ObjectId")
         try {
             return await UserModel.updateOne(
                 {
@@ -140,6 +138,24 @@ class UserTemp {
                 error: error
             }
         }
+    }
+
+    async isEmailExist(email) {
+        return await UserModel.findOne({
+            'email': email,
+            'isDeleted': 0
+        }).lean().then((res) => {
+            if (res && !_.isEmpty(res)) {
+                return {
+                    success: true,
+                    data: res
+                }
+            } else {
+                return {
+                    success: false,
+                }
+            }
+        })
     }
 }
 

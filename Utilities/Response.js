@@ -1,20 +1,21 @@
 
 class SendResponse {
     errorMsg(req, res, status, message, error, scope) {
-        res.status(status).json({ message: message })
+        res.status(status).json({ status: status, message: message })
     };
 
     successMsg(req, res, status, data, message) {
-        res.status(status).json({ message: message, data: data })
+        res.json({ status: status, message: message, data: data })
     };
 
     customMsg(req, res, status, data, message) {
-        res.status(status).json({ message: message, data: data })
+        res.json({ status: status, message: message, data: data })
     };
 
-    joiMsg(req, res, err) {
-        console.log(err, "mesJOI")
+    joiErrorMsg(req, res, err) {
+        // console.log(err, "mesJOI")
         let error = err.details.reduce((prev, curr) => {
+            // console.log(prev, "<prev", curr, "<<cur")
             prev[curr.path[0]] = curr.message.replace(/"/g, '');
             return prev;
         }, {});

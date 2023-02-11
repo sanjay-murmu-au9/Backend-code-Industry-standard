@@ -120,13 +120,13 @@ class User {
             if (existEmailorMobile.success == 'false') {
                 //hashing the password
                 const saltRound = await Query.GET_MIN_SALT_FOR_HASHING()
-                console.log(saltRound, "<<saltRound")
+                // console.log(saltRound, "<<saltRound")
                 if (!req.body.password) {
                     return __.customMsg(req, res, 406, 'Password field doesn\'t exists');
                 }
                 let hashPassword = bcrypt.hashSync(req.body.password, saltRound.data)//hasing the password;
                 req.body.password = hashPassword;
-                console.log(req.body, "<<<body")
+                // console.log(req.body, "<<<body")
                 // inserting new user into db
                 let inserted = await Query.saveNewUser(req.body)
                 if (inserted && !_.isEmpty(inserted)) {
@@ -156,7 +156,7 @@ class User {
                 }
 
                 if (isPasswordExist.data.failedAttemptedCount != undefined && isPasswordExist.data.failedAttemptedCount >= 5) {
-                    console.log(isPasswordExist.data.failedAttemptedCount, "<<<<<FailedAttempt count")
+                    // console.log(isPasswordExist.data.failedAttemptedCount, "<<<<<FailedAttempt count")
                     await Query.updateFailedAttemptedCount(req, res, isPasswordExist.data.failedAttemptedCount, true);
                     setTimeout(async () => {
                         await Query.updateFailedAttemptedCount(req, res, 0, false)
@@ -186,11 +186,11 @@ class User {
                     req.body.password = undefined;
                     req.body.token = jwtToken;
                     // updating the login details
-                    console.log(isEmailExist.data._id, "<<<<<data")
+
                     let loggedUser = await Query.updateLoginDetail(isEmailExist.data._id)
-                    console.log(loggedUser, "<<<<loggedInUser")
+
                     if (loggedUser.acknowledged == true) {
-                        return __.successMsg(req, res, 201, req.body, "user created successfully");
+                        return __.successMsg(req, res, 201, req.body, "user logged in successfully");
                     } else {
                         return __.errorMsg(req, res, 503, 'try again!!');
                     }
@@ -207,6 +207,76 @@ class User {
                 }
             }
         } catch (error) {
+            __.errorMsg(req, res, 503, "Service unavailable.", error);
+        }
+    }
+
+    async forgotPassword(req, res, next) {
+        try {
+            let { email } = req.body;
+            let emailExist = await Query.isEmailExist(email)
+            if (emailExist.success == true) {
+                const cryptrSecret = await BasicConfigQuery.GET_CRYPT_SECRET_KEY().then((res) => { if (res.success) return res.data; else { return '12345secretkey12345678' } });
+                const forgotPasswordExpiryTime = await BasicConfigQuery.GET_FORGOT_PASSWORD_MIN().then(res => { if (res.success) return res.data; else return 60 });
+
+                //initalize cryptr;
+                const cryptr = new Cryptr(cryptrSecret);
+
+                const random_character = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+                const hashedToken = cryptr.encrypt(emailExist.data._id + '`' + random_character);
+                let jwtToken = '';
+                //creating jwt token;
+                jwtToken = jwt.sign({
+                    data: hashedToken
+                }, secret, { expiresIn: parseInt(forgotPasswordExpiryTime) * 60 })
+
+                if (jwtToken) {
+
+                    //send forget Email
+                    let ExistingEmail = emailExist.data.email,
+                        userName = emailExist.data.name || 'No Name',
+                        emailAccountTemplatePath = path.join('email-templates', 'user'),
+                        templatePath = path.join(__dirname, '../', emailAccountTemplatePath, 'reset-password.pug'),
+                        imagePath = path.join(__dirname, '../', 'public/images/logo.jpeg');
+
+                    // 
+                    let frontEndHost = process.env.frontEndHost || '';
+                    let frontEndUrlForgotPassword = process.env.frontEndUrlForgotPassword || '';
+
+                    let hashLink = frontEndHost + frontEndUrlForgotPassword + '/' + jwtToken + '/email/' + ExistingEmail;
+
+                    //compile html
+                    let compiledHTML = await pug.compileFile(templatePath)({
+                        logo: base64Img.base64Sync(imagePath),
+                        name: userName,
+                        hashLink,
+                        returnEmail: 'sanjaymurmu40work@gmail.com'
+                    })
+
+                    // email object
+                    let email_obj = { to: ExistingEmail, subject: 'Reset passord', html: compiledHTML }
+
+                    let emailSent = await EmailService.sendEmail(email_obj.subject, email_obj.html, email_obj.to)
+
+
+
+                    if (emailSent.response) {
+                        return __.successMsg(req, res, 201, emailSent.response, "Email sent successfully!!");
+                    } else {
+                        __.customMsg(req, res, 406, 'Please try again!')
+                    }
+
+                } else {
+                    __.errorMsg(req, res, 503, "Please try again.",);
+                }
+
+            } else {
+                return __.errorMsg(req, res, 406, 'Email is not register with us Please register!')
+            }
+
+
+        } catch (error) {
+            console.log(error)
             __.errorMsg(req, res, 503, "Service unavailable.", error);
         }
     }
