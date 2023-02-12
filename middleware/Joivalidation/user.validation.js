@@ -40,6 +40,18 @@ const schemas = {
     joiForgotPasswordValidate: Joi.object().keys({
         email: Joi.string().email(({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })).trim().label('email').required().max(256),
 
+    }),
+
+    joiResetPassword: Joi.object().keys({
+        password: Joi.string().trim().label('password').required().min(6).max(100),
+        confirmPassword: Joi.string().trim().label('comfirm password').required().min(6).max(100).valid(Joi.ref('password'))
+            .options({
+                language: {
+                    any: {
+                        allowOnly: 'must match the password!'
+                    }
+                }
+            })
     })
 }
 
@@ -101,6 +113,17 @@ module.exports = {
         let option = options.basic;
 
         //validate Schema
+        schema.validate(req.body, option).then(() => {
+            next()
+        }).catch((err) => {
+            __.joiErrorMsg(req, res, err)
+        })
+    },
+
+    joiResetPassword: (req, res, next) => {
+        let schema = schemas.joiResetPassword;
+        let option = options.basic;
+
         schema.validate(req.body, option).then(() => {
             next()
         }).catch((err) => {

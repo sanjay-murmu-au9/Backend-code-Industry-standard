@@ -81,6 +81,27 @@ class BasicConfigController {
             }
         })
     }
+
+    //get the min salt round for
+    GET_MIN_SALT_ROUND_FOR_HASHING = async () => {
+        return await Model.aggregate([
+            {
+                $match: {
+                    'configName': 'GET_MIN_SALT_ROUND_FOR_HASHING'
+                }
+            }
+        ]).allowDiskUse(true)
+            .then((res) => {
+                if (res && res.length) {
+                    return {
+                        success: true,
+                        data: isNaN(res[0].configValue) ? 10 : parseInt(res[0].configValue)
+                    }
+                } else return {
+                    success: false
+                }
+            })
+    }
 }
 
 module.exports = new BasicConfigController();

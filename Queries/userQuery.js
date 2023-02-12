@@ -1,5 +1,6 @@
 const OTPTemplate = require('../Models/OTPTemplate')
 const UserModel = require('../Models/UserDetail')
+const ForgotPasswordModel = require('../Models/forgotPassword')
 const BasicConfig = require('../Models/BasicConfig')
 const _ = require('lodash')
 const mongoose = require('mongoose')
@@ -155,6 +156,66 @@ class UserTemp {
                     success: false,
                 }
             }
+        })
+    }
+
+    async updateForgotPassword(id, email, token) {
+        return await ForgotPasswordModel.create({
+            userId: id,
+            token: token,
+            email: email
+        }).then((res) => {
+            if (res && !_.isEmpty(res)) {
+                return {
+                    success: true,
+                    data: res
+                }
+            } else {
+                return {
+                    success: false
+                }
+            }
+        })
+    }
+
+    async getTokenDetails(email) {
+        return ForgotPasswordModel.findOne({
+            email: email,
+            status: 'new'
+        }).lean().sort({ 'createdAt': -1 })
+            .then((res) => {
+                if (res && !_.isEmpty(res)) {
+                    return {
+                        success: true,
+                        data: res
+                    }
+                } else {
+                    return {
+                        success: false
+                    }
+                }
+            })
+    }
+
+    async resetForgotPassword(id, passord) {
+        return UserModel.updateOne({ _id: mongoose.Types.ObjectId(id) }, {
+            $set: {
+                password: passord
+            }
+        })
+    }
+
+    async updateInForgotModel(id) {
+        // userId:mongoose.Types.ObjectId(id)
+        return ForgotPasswordModel.updateOne({ userId: mongoose.Types.ObjectId(id) }, {
+            $set: {
+                status: 'changed'
+            }
+        }, {
+            lean: true,
+            upsert: false,
+            new: false,
+            multi: true
         })
     }
 }

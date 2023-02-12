@@ -234,6 +234,7 @@ class User {
 
                     //send forget Email
                     let ExistingEmail = emailExist.data.email,
+                        emailId = emailExist.data._id,
                         userName = emailExist.data.name || 'No Name',
                         emailAccountTemplatePath = path.join('email-templates', 'user'),
                         templatePath = path.join(__dirname, '../', emailAccountTemplatePath, 'reset-password.pug'),
@@ -258,9 +259,10 @@ class User {
 
                     let emailSent = await EmailService.sendEmail(email_obj.subject, email_obj.html, email_obj.to)
 
+                    let isDbUpdated = await Query.updateForgotPassword(emailId, ExistingEmail, hashedToken)
 
                     // why didn't reflect in git
-                    if (emailSent.response) {
+                    if (emailSent.response && isDbUpdated.success == true) {
                         return __.successMsg(req, res, 201, emailSent.response, "Email sent successfully!!");
                     } else {
                         __.customMsg(req, res, 406, 'Please try again!')
@@ -275,6 +277,28 @@ class User {
             }
 
 
+        } catch (error) {
+            console.log(error)
+            __.errorMsg(req, res, 503, "Service unavailable.", error);
+        }
+    }
+
+    async resetPassword(req, res) {
+        try {
+            let id = req.body.userId;//:
+            let password = req.body.hashedPassword;
+
+            //inserting the new user into the db;
+            let isUpdatedPassword = await Query.resetForgotPassword(id, password);
+            let changeInForgotPasswordModel = await Query.updateInForgotModel(id)
+
+            if (isUpdatedPassword && changeInForgotPasswordModel) {
+
+                return __.successMsg(req, res, 201, {}, "updated password successfully!!");
+            } else {
+                return __.errorMsg(req, res, 409, "Error while updating the password!!");
+
+            }
         } catch (error) {
             console.log(error)
             __.errorMsg(req, res, 503, "Service unavailable.", error);
