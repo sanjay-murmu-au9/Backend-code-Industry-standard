@@ -109,14 +109,12 @@ class User {
 
     async create(req, res, next) {
         try {
-            let { email, phone, Name, gender } = req.body;
+            let { email, phone, name, gender } = req.body;
 
             let existEmailorMobile = await Query.isEmailUnique(email, phone)
 
-            console.log(existEmailorMobile, "true/false")
-            // return
             //new user
-            if (existEmailorMobile.success === true) return __.customMsg(req, res, 223, "user all ready exist!")
+            if (existEmailorMobile.success === true) return __.customMsg(req, res, 223, "user all_ready exist!")
             if (existEmailorMobile.success == 'false') {
                 //hashing the password
                 const saltRound = await Query.GET_MIN_SALT_FOR_HASHING()
@@ -126,7 +124,13 @@ class User {
                 }
                 let hashPassword = bcrypt.hashSync(req.body.password, saltRound.data)//hasing the password;
                 req.body.password = hashPassword;
-                // console.log(req.body, "<<<body")
+                // generate Token
+                let OTP = genetateOTP()
+                let otpDetails = {
+                    OTP: OTP,
+                    GeneratedAt: new Date()
+                }
+                req.body.otpDetails = otpDetails;
                 // inserting new user into db
                 let inserted = await Query.saveNewUser(req.body)
                 if (inserted && !_.isEmpty(inserted)) {
@@ -156,7 +160,6 @@ class User {
                 }
 
                 if (isPasswordExist.data.failedAttemptedCount != undefined && isPasswordExist.data.failedAttemptedCount >= 5) {
-                    // console.log(isPasswordExist.data.failedAttemptedCount, "<<<<<FailedAttempt count")
                     await Query.updateFailedAttemptedCount(req, res, isPasswordExist.data.failedAttemptedCount, true);
                     setTimeout(async () => {
                         await Query.updateFailedAttemptedCount(req, res, 0, false)
@@ -168,7 +171,6 @@ class User {
                 let jwtToken = '';
                 let isEqual = bcrypt.compareSync(password, isPasswordExist.data.password)   //bcrypt compare password
                 if (isEqual === true) {
-                    let id = isPasswordExist.data._id;
 
                     // generate token
                     const expireTime = await BasicConfigQuery.GET_TOKEN_EXPIRE_IN_MIN().then((res) => { if (res.success) return res.data; else return 50 })
@@ -181,7 +183,7 @@ class User {
                     }
 
                     jwtToken = jwt.sign({
-                        result: JSON.stringify(data)
+                        data: JSON.stringify(data)
                     }, secret, { expiresIn: parseInt(expireTime) * 60 })
                     req.body.password = undefined;
                     req.body.token = jwtToken;
@@ -299,6 +301,26 @@ class User {
                 return __.errorMsg(req, res, 409, "Error while updating the password!!");
 
             }
+        } catch (error) {
+            console.log(error)
+            __.errorMsg(req, res, 503, "Service unavailable.", error);
+        }
+    }
+
+    async resetPasswordWithClosed(req, res) {
+        try {
+
+            req.user.password = req.body.password; // injecting the password
+            let User = req.user;
+            let updateUserPassword = await Query.userPasswordUpdate(User)
+
+            if (updateUserPassword && !_.isEmpty(updateUserPassword)) {
+                updateUserPassword.password = undefined;
+                return __.successMsg(req, res, 200, {}, "password updated successfully for the user!");
+            } else {
+                return __.errorMsg(req, res, 401, 'Please try again!')
+            }
+
         } catch (error) {
             console.log(error)
             __.errorMsg(req, res, 503, "Service unavailable.", error);

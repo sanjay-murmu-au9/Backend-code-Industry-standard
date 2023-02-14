@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
 
         let hashedPassword = bcrypt.hashSync(req.body.password, saltRounds); // hashing the password
 
-        req.body.hashedPassword = hashedPassword;
+        req.body.password = hashedPassword;
         next()
 
     } catch (error) {

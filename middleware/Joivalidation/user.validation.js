@@ -10,25 +10,26 @@ const schemas = {
     joiSignupValidate: Joi.object().keys({
         email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'in'] } }).trim().label('email').required().max(256),
         password: Joi.string().trim().label('password').required().min(6).max(10000),
-        firstName: Joi.string().trim().label('first name').regex(/^[a-z,.'-]+$/i).options({
+        name: Joi.string().trim().label('first name').regex(/^[a-z,.'-]+$/i).required().options({
             language: {
                 string: {
                     regex: {
-                        base: 'Should be valid first Name'
+                        base: 'Should be valid Name'
                     }
                 }
             }
         }).required(),
-        phoneNumber: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Phone Number').options({
+        // phone: Joi.number().
+        phone: Joi.string().regex(/^[6-9]{1}[0-9]{9}$/).label('Phone Number').required().options({
             language: {
                 string: {
                     regex: {
-                        base: 'Should be a valid Number'
+                        base: 'Should be a valid phone number'
                     }
                 }
             }
         }),
-        gender: Joi.string().trim().valid('male', 'female', 'transgender')
+        gender: Joi.string().trim().valid(['male', 'female', 'transgender'])
     }),
 
     joiloggedinValidate: Joi.object().keys({
@@ -52,6 +53,20 @@ const schemas = {
                     }
                 }
             })
+    }),
+
+    joiResetPasswordWithClosed: Joi.object().keys({
+        existingPassword: Joi.string().trim().label('existing password').required().min(6).max(100),
+        password: Joi.string().trim().label('password').required().min(6).max(100).invalid(Joi.ref('existingPassword')),
+        confirmPassword: Joi.string().trim().label('confirmPassword').required().min(6).max(100).valid(Joi.ref('password'))
+            .options({
+                language: {
+                    any: {
+                        allowOnly: 'must match the password'
+                    }
+                }
+            })
+
     })
 }
 
@@ -123,6 +138,17 @@ module.exports = {
     joiResetPassword: (req, res, next) => {
         let schema = schemas.joiResetPassword;
         let option = options.basic;
+
+        schema.validate(req.body, option).then(() => {
+            next()
+        }).catch((err) => {
+            __.joiErrorMsg(req, res, err)
+        })
+    },
+
+    joiResetPasswordWithClosed: (req, res, next) => {
+        let schema = schemas.joiResetPasswordWithClosed;
+        let option = options.array;
 
         schema.validate(req.body, option).then(() => {
             next()
