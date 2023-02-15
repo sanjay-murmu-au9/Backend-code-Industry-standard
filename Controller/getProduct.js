@@ -69,6 +69,29 @@ class ProductCtrl {
         }
     }
 
+    async getAllOrder(req, res) {
+        try {
+            let page = parseInt(req.query.page) || 1;
+            let recordPerPage = parseInt(req.query.recordPerPage) || 5;
+            let skip = (page - 1) * recordPerPage;
+            let customerId = req.query.customerId || '';
+            let invoiceNo = req.query.invoiceNo || ''
+
+            let result = await Query.getAllOrderProduct(customerId, invoiceNo, page, recordPerPage, skip)
+
+            if (result.length == 0) {
+                return __.customMsg(req, res, 204, 'No Matched result found!!')
+            }
+
+
+            return __.successMsg(req, res, 200, result[0], "All Order details!!")
+
+        } catch (error) {
+            __.errorMsg(req, res, 503, "service unavailable.", error)
+
+        }
+    }
+
 }
 
 module.exports = new ProductCtrl;
