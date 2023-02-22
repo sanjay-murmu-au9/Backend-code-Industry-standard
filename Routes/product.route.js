@@ -2,10 +2,17 @@ const express = require('express');
 const app = express.Router();
 const ProductCtrl = require('../Controller/getProduct')
 const { verifyUserToken } = require('../hooks/index')
+const cron = require('node-cron')
 
 app.post('/postproduct', ProductCtrl.postProduct);
 
+// cron.schedule('* * * * * *', async () => {
+//     let a = await ProductCtrl.getSingleProduct;
+//     console.log(a, '============>>>')
+// })
+
 app.get('/getProduct', verifyUserToken, ProductCtrl.getProduct);
+
 
 app.get('/getsingleProduct/:prodId', ProductCtrl.getSingleProduct);
 

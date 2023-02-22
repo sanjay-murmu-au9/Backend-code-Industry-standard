@@ -75,9 +75,11 @@ class ProductCtrl {
             let recordPerPage = parseInt(req.query.recordPerPage) || 5;
             let skip = (page - 1) * recordPerPage;
             let customerId = req.query.customerId || '';
-            let invoiceNo = req.query.invoiceNo || ''
+            let invoiceNo = req.query.invoiceNo || '';
+            let to = req.query.to;
+            let from = req.query.from;
 
-            let result = await Query.getAllOrderProduct(customerId, invoiceNo, page, recordPerPage, skip)
+            let result = await Query.getAllOrderProduct(customerId, invoiceNo, page, recordPerPage, skip, to, from)
 
             if (result.length == 0) {
                 return __.customMsg(req, res, 204, 'No Matched result found!!')

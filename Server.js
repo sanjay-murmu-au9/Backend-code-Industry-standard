@@ -9,6 +9,7 @@ const cors = require('cors');
 const chalk = require('chalk');
 const helmet = require('helmet');
 const cluster = require('cluster');
+const cron = require('node-cron')
 
 
 let envConfig;
@@ -45,6 +46,10 @@ if (debugMode) {
         })
     }
 }
+
+cron.schedule('* 1 * * * * ', () => {
+    console.log('Hello Sanjay')
+})
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }))
