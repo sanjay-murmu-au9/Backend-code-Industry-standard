@@ -6,7 +6,7 @@ const multipartmiddleware = multer()
 const reportCtrl = require('../Controller/getReport')
 // const { } = require('../')
 
-app.get('/samplerprt', reportCtrl.getReport);
+app.get('/samplereprt', reportCtrl.getReport);
 app.post('/samplerprtupload', reportCtrl.uploadReport);
 app.post('/sampleanotherrprtupload', multipartmiddleware.single('file'), reportCtrl.uploadAnotherReport);
 

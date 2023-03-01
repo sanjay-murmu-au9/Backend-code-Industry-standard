@@ -1,7 +1,18 @@
 const Query = require('../Queries/productQuery')
 const __ = require('../Utilities/Response');
+const AxiosApicall = require('../Utilities/axisApi')
+const thirdPartyUrl = process.env.Api;
 
 
+//third party api
+async function thirdPartytoUpdate(data) {
+    let response = AxiosApicall(thirdPartyUrl, method = "POST", data) // data -> will be 
+
+}
+
+
+// call this api where it is needed
+thirdPartytoUpdate
 class ProductCtrl {
     async postProduct(req, res) {
         try {
@@ -91,6 +102,17 @@ class ProductCtrl {
         } catch (error) {
             __.errorMsg(req, res, 503, "service unavailable.", error)
 
+        }
+    }
+
+    async testProd(req, res) {
+        try {
+            console.log('hi there')
+            const data = await Query.getCetainDataOnly()
+
+            return __.successMsg(req, res, 200, data, "All Order details!!")
+        } catch (error) {
+            console.log(error)
         }
     }
 

@@ -101,6 +101,23 @@ class ProductQuery {
             console.log(error)
         }
     }
+
+    async getCetainDataOnly() {
+        try {
+            return await Model.find({}, {
+
+                'imageUrl': 1,
+                'price': {
+
+                    $cond: { if: { $gte: ["$price", 250] }, then: 30, else: 20 }
+
+                }
+
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
 }
 
 module.exports = new ProductQuery()

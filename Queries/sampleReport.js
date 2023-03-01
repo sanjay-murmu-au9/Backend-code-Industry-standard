@@ -7,9 +7,9 @@ class Report {
             let searchObj = {}
             searchObj = {
                 'isDeleted': 0,
-                'salesOrganization': distributor.salesOrg.toString(),
-                'distributionChennel': distributor.distributionChennel.toString(),
-                'plant': distributor.plant.toString(),
+                // 'salesOrganization': distributor.salesOrg.toString(),
+                // 'distributionChennel': distributor.distributionChennel.toString(),
+                // 'plant': distributor.plant.toString(),
                 'dateOfOrderPlacing': {
                     $gte: from,
                     $lte: to
@@ -17,34 +17,42 @@ class Report {
             };
 
             let fieldToProject = {
-                '_id': 1,
-                'dateOfOrderPlacing': 1,
-                'createdAt': 1,
-                'dateOfPlaceing': { $dateToString: { format: '%Y-%m-%d', date: "$dateOfPlaceing", timezone: "+05:30" } },
-                'orderPlacedTime': { $dateToString: { format: '%H:%M:%S', date: "$orderPlacedTime", timezone: "+05:30" } },
-                'customerId': 1,
-                'salesmanId': 1,
-                'paymentStatus': 1,
-                'salesOrderId': 1,
-                'shippingCharges': 1,
-                'deliveryCharge': 1,
-                'totalAmount': 1,
-                'totalAmountWithoutTax': 1,
-                'totalTaxAmount': 1,
-                'orderType': 1,
-
-
-                'salesmanId': 1,
-                'fulfillmentStatus': 1,
-                'dateOfDelivery': 1,
-                'application_Form': 1,
-                'goFrugalError': 1,
-                'orderType': 1,
-                'salemanObj': 1,
-                'goFrugalId': 1,
-                'ship_to_party': 1,
-                'sold_to_party': { $int: '$sold_to_party' },
-                "item": 1,
+                _id: 1,
+                dateOfOrderPlacing: "$dateOfOrderPlacing",
+                createdAt: 1,
+                dateOfPlacing: {
+                    '$dateToString': {
+                        format: '%Y-%m-%d',
+                        date: '$dateOfPlacing',
+                        timezone: '+05:30'
+                    }
+                },
+                orderPlacedTime: {
+                    '$dateToString': {
+                        format: '%H:%M:%S',
+                        date: '$dateOfDelivery',
+                        timezone: '+05:30'
+                    }
+                },
+                customerId: "$customerId",
+                salesmanId: "$salesmanId",
+                paymentStatus: "$paymentStatus",
+                salesOrderId: "$salesOrderId",
+                shippingCharges: "$shippingCharges",
+                deliveryCharge: "$deliveryCharge",
+                totalAmount: "$totalAmount",
+                totalAmountWithoutTax: "$totalAmountWithoutTax",
+                totalTaxAmount: "$totalTaxAmount",
+                orderType: "$orderType",
+                fulfillmentStatus: "$fulfillmentStatus",
+                dateOfDelivery: "$dateOfDelivery",
+                application_Form: "$application_Form",
+                goFrugalError: "$goFrugalError",
+                salemanObj: 1,
+                goFrugalId: 1,
+                ship_to_party: 1,
+                sold_to_party: 1,
+                item: 1,
                 'saleOrderObj.deliveryDate': 1,
                 'saleOrderObj.paymentMode': 1,
                 'saleOrderObj.discount_amount': 1,
@@ -53,8 +61,9 @@ class Report {
                 'saleOrderObj.customerEmail': 1,
                 'saleOrderObj.customerAddressLine1': 1,
                 'saleOrderObj.customerAddressLine2': 1,
-                'isSOCancelled': { $ifNull: ['$isSOCancelled', 'NA'] }
-
+                isSOCancelled: {
+                    '$ifNull': ['$isSOCancelled', 'NA']
+                }
             }
             let result = await Model.aggregate([
                 {
@@ -67,52 +76,52 @@ class Report {
                         fieldToProject
                     }
                 },
-                {
-                    "$unwind": {
-                        path: '$items',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'customers',
-                        let: { "custId": "$sold_to_party" },
-                        pipeline: [
-                            {
-                                $match: {
-                                    $expr: { $eq: ['$goFrugalId', '$$custId'] }
-                                }
-                            },
-                            { $project: { "_id": 1, 'name': 1, 'ownerName': 1, 'businessName': 1, 'application_from': 1, 'businessName': 1 } }
-                        ],
-                        as: "customrtDetails"
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'salesmanagers',
-                        let: { 'salesId': "$salesmanId" },
-                        pipeline: [
-                            {
-                                $match: {
-                                    $expr: { $eq: ["$_id", "$$salesId"] }
-                                }
-                            },
-                            { $project: { "employeerName": 1, 'fullName': 1, 'employeeId': 1 } }
-                        ],
-                        as: "smDetails"
-                    }
-                },
-                {
-                    $unwind: "$smdetails",
-                    preserveNullAndEmptyArrays: true
-                }
+                // {
+                //     "$unwind": {
+                //         path: '$items',
+                //         preserveNullAndEmptyArrays: true
+                //     }
+                // },
+                // {
+                //     $lookup: {
+                //         from: 'customers',
+                //         let: { "custId": "$sold_to_party" },
+                //         pipeline: [
+                //             {
+                //                 $match: {
+                //                     $expr: { $eq: ['$goFrugalId', '$$custId'] }
+                //                 }
+                //             },
+                //             { $project: { "_id": 1, 'name': 1, 'ownerName': 1, 'businessName': 1, 'application_from': 1, 'businessName': 1 } }
+                //         ],
+                //         as: "customrtDetails"
+                //     }
+                // },
+                // {
+                //     $lookup: {
+                //         from: 'salesmanagers',
+                //         let: { 'salesId': "$salesmanId" },
+                //         pipeline: [
+                //             {
+                //                 $match: {
+                //                     $expr: { $eq: ["$_id", "$$salesId"] }
+                //                 }
+                //             },
+                //             { $project: { "employeerName": 1, 'fullName': 1, 'employeeId': 1 } }
+                //         ],
+                //         as: "smDetails"
+                //     }
+                // },
+                // {
+                //     $unwind: "$smdetails",
+                //     preserveNullAndEmptyArrays: true
+                // }
             ]).allowDiskUse(true);
             return result;
 
         } catch (error) {
             console.log(error)
-            throw new Error(error.message);
+            throw new Error(error.message, "QUERY ERROR");
         }
     }
 

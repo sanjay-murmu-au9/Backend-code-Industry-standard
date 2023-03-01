@@ -11,9 +11,9 @@ app.post('/postproduct', ProductCtrl.postProduct);
 //     console.log(a, '============>>>')
 // })
 
-app.get('/getProduct', verifyUserToken, ProductCtrl.getProduct);
+app.get('/getProduct',/* verifyUserToken,*/ ProductCtrl.getProduct);
 
-
+app.get('/producttest', ProductCtrl.testProd)
 app.get('/getsingleProduct/:prodId', ProductCtrl.getSingleProduct);
 
 app.get('/getProductbytype', ProductCtrl.getProductbytype);

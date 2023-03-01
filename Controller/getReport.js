@@ -4,7 +4,8 @@ const moment = require('moment')
 const dayinwords = ['', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const mime = require('mime-types')
 const _ = require('lodash')
-const csv = require('csvtojson')
+const { parse } = require('json2csv')
+// const downloadCsv = require('download-csv');
 
 
 class ProductCtrl {
@@ -15,23 +16,24 @@ class ProductCtrl {
                 m: 0,
                 s: 0,
                 millisecond: 0
-            });
+            }).toDate();
             const to = moment(req.query.to, 'YYYY/MM/DD').set({
                 h: 23,
                 m: 59,
                 s: 0,
                 millisecond: 999
-            });
+            }).toDate();
 
             // from token
             let distributorName = req.dataForDistributor && req.dataForDistributor.nameToDisplay ? req.dataForDistributor.nameToDisplay : 'NA';
             let plant = req.dataForDistributor && req.dataForDistributor.plant ? req.dataForDistributor.plant : 'NA';
-            let csvData = [];
-            const tempData = await Query.getReport(from, to, req.dataForDistributor);
-            // let response = {
-            //     status: 200,
-            //     result: tempData
-            // }
+            // let csvData = [];
+            const tempData = await Query.getReport(from, to,/* req.dataForDistributor */);
+            // console.log(tempData, "<<<<<<tempData")
+            let response = {
+                status: 200,
+                result: tempData
+            }
 
             // return res.send(response)
             let saleExecutiveIds = new Set();
@@ -47,83 +49,89 @@ class ProductCtrl {
             }
 
             tempData.forEach(element => {
-                let source = '', beatPlan = "Not Mapped";
-                let totalAmount = 0; salesOrderId = "N/A", discountAmt = 0, paymentMode = '', subtotal = 0;
+
+                // let source = '', beatPlan = "Not Mapped";
+                let totalAmount = 0, salesOrderId = "N/A", discountAmt = 0, paymentMode = '', subtotal = 0;
                 let ownerName = '', salesmanemployeer = '';
                 let customerId = '', storeName = '', mobileNo = '', emailId = 'NA', address = '', deliveryDate = '';
                 let dayoforder = '', itemizedamount = 0, effectiveUnitPrice = 0, itemizedDiscount = 0;
                 let materialCode = '', materialName = '', itemUnitQuantity = 0.0, itemQuantity = 0, deliveryCharge = 0, payablePrice = 0, payableAmount = 0;
 
 
-
-                paymentMode = element.paymentMode;
+                // console.log(element.fieldToProject.paymentStatus, "<<<<<<<<<<<ELEMENT")
+                paymentMode = element.fieldToProject.paymentStatus;
                 if (paymentMode && (paymentMode == 'Cash-on-delivery' || paymentMode === 'cod')) {
                     paymentMode = 'Pay on Delivery';
                 }
 
-                if (element.dayoforder)
-                    dayoforder = dayinwords[element.dayoforder];
-
-
-                try {
-                    let goFrugaldata;
-                    if (element.goFrugaldata) {
-                        goFrugaldata = JSON.parse(element.goFrugalError);
-                        if (goFrugaldata.message == 'Success')
-                            salesOrderId = goFrugaldata.data.sales_order_no;
-                    } else {
-                        if (element.salesOrderId)
-                            salesOrderId = element.salesOrderId;
-                    }
-
-                } catch (err) {
-                    console.log('goFrugal is not in proper format:', element._id);
+                if (element.fieldToProject.dateOfPlacing) {
+                    dayoforder = dayinwords[element.dateOfPlacing];
                 }
 
-                if (element.items.length > 0 && element.items.length == 1) {
-                    if (element.items[0].discount_amount != undefined)
-                        discountAmt = Math.abs(element.items[0].discount_amount);
-                } else if (element.items.length && element.items.length > 1) {
-                    // if items is more then one
-                    element.items.forEach((itemlm) => {
-                        if (itemlm.discount_amount != undefined)
-                            discountAmt = Math.abs(discountAmt + itemlm.discount_amount);
-                    });
-                }
+                // console.log(paymentMode, element.fieldToProject.paymentStatus, dayoforder, "<<<<dayoforder")
+                // try {
+                //     let goFrugaldata;
+                //     if (element.goFrugaldata) {
+                //         goFrugaldata = JSON.parse(element.goFrugalError);
+                //         if (goFrugaldata.message == 'Success')
+                //             salesOrderId = goFrugaldata.data.sales_order_no;
+                //     } else {
+                //         if (element.salesOrderId)
+                //             salesOrderId = element.salesOrderId;
+                //     }
 
-                if (element.orderType) {
-                    if (element.portal == 'salesmanOrder') {
-                        source = 'Saleman App';
-                        deliveryCharge = element.shippingCharges;
-                    }
-                    else if (element.orderType === 'pdwaycool') {
-                        source = 'Waycool App';
-                        deliveryCharge = element.deliveryCharge;
-                    }
-                    else if (element.orderType == 'distributor') {
-                        source = 'Distributor';
-                        deliveryCharge = element.deliveryCharge;
-                    }
-                    else if (element.orderType == 'callcenter' || element.orderType == 'callcenter')
-                        source = 'Call-Center';
-                } else {
-                    source = 'NA';
-                }
+                // } catch (err) {
+                //     console.log('goFrugal is not in proper format:', err, element._id);
+                // }
 
-                let isSOCancelled = element.soResult && element.soResult.isSOCancelled === 1 ? 'Cancelled' : 'Placed';
+                // if (element.items.length > 0 && element.items.length == 1) {
+                //     if (element.items[0].discount_amount != undefined)
+                //         discountAmt = Math.abs(element.items[0].discount_amount);
+                // } else if (element.items.length && element.items.length > 1) {
+                //     // if items is more then one
+                //     element.items.forEach((itemlm) => {
+                //         if (itemlm.discount_amount != undefined)
+                //             discountAmt = Math.abs(discountAmt + itemlm.discount_amount);
+                //     });
+                // }
+
+                // if (element.orderType) {
+                //     if (element.portal == 'salesmanOrder') {
+                //         source = 'Saleman App';
+                //         deliveryCharge = element.shippingCharges;
+                //     }
+                //     else if (element.orderType === 'pdwaycool') {
+                //         source = 'Waycool App';
+                //         deliveryCharge = element.deliveryCharge;
+                //     }
+                //     else if (element.orderType == 'distributor') {
+                //         source = 'Distributor';
+                //         deliveryCharge = element.deliveryCharge;
+                //     }
+                //     else if (element.orderType == 'callcenter' || element.orderType == 'callcenter')
+                //         source = 'Call-Center';
+                // } else {
+                //     source = 'NA';
+                // }
+
+
+                // let isSOCancelled = element.soResult && element.soResult.isSOCancelled === 1 ? 'Cancelled' : 'Placed';
+                let csvData = []
                 csvData.push({
-                    'Plant Code': plant,
-                    'distributor Name': distributorName,
+                    'Plant Code': plant || '1000',
+                    'distributor Name': distributorName || "TEST",
                     'Order Date': element.orderPlacedDate ? element.orderPlacedDate : '',
                     'Order Time': element.orderPlacedTime ? element.orderPlacedTime : 'Not Maped',
+                    'paymentMode': paymentMode,
                     //....
                     'Api Response': element.goFrugalError ? element.goFrugalError : "NA"
                 });
 
                 if (csvData && csvData.length) {
                     let csv = parse(csvData);
+                    // console.log(csv, "CSVDATA++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-                    res.setHeader('Content-disposition', `attachment; filename=soreport - ${req.query.from} - ${req.query.to}.csv`)
+                    res.setHeader('Content-dispositio', `attachment; filename=soreport - ${req.query.from} - ${req.query.to}.csv`)
                     res.set('Content-Type', 'text/csv');
                     res.status(200).send(csv);
                 } else {
@@ -134,7 +142,8 @@ class ProductCtrl {
             })
 
             // const Product = await Query.postingProduct(allProduct)
-            // return __.successMsg(req, res, 201, Product, "Product created successfully");
+
+            // return __.successMsg(req, res, 201, response, "Product created successfully");
 
 
         } catch (error) {
@@ -224,6 +233,17 @@ class ProductCtrl {
             }
         } catch (error) {
             console.log(error)
+        }
+    }
+
+    async downloadReport(req, res) {
+        try {
+
+
+            return __.successMsg(req, res, 200, 'result', "file showing in response successfully!")
+
+        } catch (error) {
+            console.log(error, "<<<ERROR")
         }
     }
 }
