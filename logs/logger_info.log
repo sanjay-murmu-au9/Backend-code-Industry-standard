@@ -1,0 +1,2 @@
+2023-03-06 08:41:51 [INFO]: ::1 - - [06/Mar/2023:03:11:51 +0000] "GET /api/v1/samplereprt?from=2023/02/26&to=2023/02/26 HTTP/1.1" 200 135 "-" "PostmanRuntime/7.31.1"
+2023-03-06 08:42:18 [INFO]: ::1 - - [06/Mar/2023:03:12:18 +0000] "GET /api/v1/samplereprt?from=2023/02/26&to=2023/02/26 HTTP/1.1" 200 135 "-" "PostmanRuntime/7.31.1"

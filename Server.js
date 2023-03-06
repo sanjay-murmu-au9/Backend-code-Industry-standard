@@ -66,7 +66,7 @@ app.use(morgan('combined', { stream }));
 
 // your API routes and middleware go here...
 
-// error handling middleware
+// // error handling middleware
 app.use(function (err, req, res, next) {
     // log error message to file using logger instance
     logger.error(
@@ -81,6 +81,16 @@ app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error');
 });
+
+//bunyan log
+// const bunyanLogger = require('./Utilities/bunyan.logger');
+
+// //log a message for every API request
+
+// app.use((req, res, next) => {
+//     bunyanLogger.info(`API request: ${req.method} ${req.originalUrl}`)
+//     next()
+// })
 
 
 // Router Config

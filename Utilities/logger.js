@@ -11,7 +11,7 @@ const logger = createLogger({
             return `${timestamp} [${level.toUpperCase()}]: ${message}`;
         })
     ),
-    transports: [new transports.File({ filename: 'logger_info.log' })],
+    transports: [new transports.File({ filename: 'logs/logger_info.log' })],
 });
 
 // create custom stream object for morgan middleware
