@@ -1,5 +1,17 @@
 const express = require('express');
 const app = express();
+const morgan = require('morgan');
+const ModifiedLogger = require('../Utilities/loggerModified');
+
+app.use(morgan('combined')); app.use(morgan('combined'));
+
+ModifiedLogger.stream = {
+    write: function (message, encoding) {
+        ModifiedLogger.info(message)
+    }
+}
+
+app.use(require('morgan')('combined', { 'stream': ModifiedLogger.stream }))
 
 
 app.use('/api/v1/', require('./userDetail.route'))
@@ -19,5 +31,7 @@ app.use(function (req, res, next) {
         }
     })
 })
+
+
 
 module.exports = app;

@@ -10,7 +10,9 @@ const chalk = require('chalk');
 const helmet = require('helmet');
 const cluster = require('cluster');
 const cron = require('node-cron')
-const { logger, stream } = require('./Utilities/logger')
+// const ultMiddleware = require('./Utilities/util.middleware/index')
+// const ModifiedLogger = require('./Utilities/loggerModified');
+// const { logger, stream } = require('./Utilities/logger')
 
 
 let envConfig;
@@ -60,27 +62,28 @@ app.use(cors())
 app.use(helmet())
 app.use(mongoSanitizer())
 
+// ultMiddleware(app)
 require('./DataAdaptor/connection');
 // configure morgan middleware to use custom stream
-app.use(morgan('combined', { stream }));
+// app.use(morgan('combined', { stream }));
 
 // your API routes and middleware go here...
 
 // // error handling middleware
-app.use(function (err, req, res, next) {
-    // log error message to file using logger instance
-    logger.error(
-        `${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`
-    );
+// app.use(function (err, req, res, next) {
+//     // log error message to file using logger instance
+//     logger.error(
+//         `${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`
+//     );
 
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
+//     // set locals, only providing error in development
+//     res.locals.message = err.message;
+//     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    // render the error page
-    res.status(err.status || 500);
-    res.render('error');
-});
+//     // render the error page
+//     res.status(err.status || 500);
+//     res.render('error');
+// });
 
 //bunyan log
 // const bunyanLogger = require('./Utilities/bunyan.logger');
@@ -91,6 +94,7 @@ app.use(function (err, req, res, next) {
 //     bunyanLogger.info(`API request: ${req.method} ${req.originalUrl}`)
 //     next()
 // })
+
 
 
 // Router Config

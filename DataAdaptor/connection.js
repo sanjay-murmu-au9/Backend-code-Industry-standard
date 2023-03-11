@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const envConfig = require('../Server');
 mongoose.Promise = global.Promise
 const chalk = require('chalk');
-
+const moment = require('moment')
+const fs = require('fs')
 //-----Database Connection----------
 try {
 
@@ -32,7 +33,16 @@ try {
 
       if (err) return console.error(chalk.red(' [ ✗ ] '), err);
       // console.log(chalk.green(' [ ✓ ]'), `Connected to Database : ${envConfig.Database.DatabaseName}`); 
-      mongoose.set('debug', true);
+      mongoose.set('debug',/* true*/(collectionName, method, query, doc) => {
+        let date1 = moment(new Date()).format("YYYY-MM-DD")
+        let fileName = 'db' + date1 + '.txt';
+        let path = './logs/';
+        let queryLog = `${collectionName}.${method}` + JSON.stringify(query) + doc + " \r\n";
+        fs.appendFile(path + fileName, queryLog, function (err) {
+          if (err) throw err
+        })
+
+      });
     });
 
 } catch (error) {
