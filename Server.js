@@ -10,6 +10,7 @@ const chalk = require('chalk');
 const helmet = require('helmet');
 const cluster = require('cluster');
 const cron = require('node-cron')
+const schedulingEvents = require('./Utilities/cron')
 // const ultMiddleware = require('./Utilities/util.middleware/index')
 // const ModifiedLogger = require('./Utilities/loggerModified');
 // const { logger, stream } = require('./Utilities/logger')
@@ -50,9 +51,14 @@ if (debugMode) {
     }
 }
 
-cron.schedule('* 1 * * * * ', () => {
-    console.log('Hello Sanjay')
-})
+// cron.schedule('* 1 * * * * ', () => {
+//     console.log('Hello Sanjay')
+// })
+
+if (cronstatus == true) {
+    let abc = schedulingEvents.sendTestCustomerSms()
+    console.log(abc)
+}
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }))
